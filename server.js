@@ -5,13 +5,14 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const fs = require('fs'); 
 const Razorpay = require('razorpay');
-const userRoutes = require('./routes/userRoutes'); // Add this line to import the fs module
+const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/adminRoutes');
 const registrationRoutes = require('./routes/registerRoutes');
 const menuRoutes = require('./routes/menuRoutes');
 const roomRoutes = require('./routes/roomRoutes.js');
 const complaintRoutes = require('./routes/complaintRoutes.js');
 const paymentRoutes = require('./routes/paymentRoutes');
+
 // Load environment variables
 dotEnv.config();
 
@@ -22,9 +23,22 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// CORS configuration
+// CORS configuration - Updated to use environment variables
 const corsOptions = {
-  origin: 'http://localhost:5174', // Your React app's URL
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = process.env.CORS_ORIGINS 
+      ? process.env.CORS_ORIGINS.split(',').map(url => url.trim())
+      : ['http://localhost:5174'];
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -51,6 +65,7 @@ app.use((req, res, next) => {
   console.log('=======================\n');
   next();
 });
+
 app.use('/api/admin', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/menu', menuRoutes);
@@ -100,4 +115,3 @@ mongoose.connect(process.env.MONGO_URI)
 app.listen(PORT, () => {
   console.log(`Server Running Successfully at ${PORT}`);
 });
-
