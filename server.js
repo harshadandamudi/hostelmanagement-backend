@@ -26,16 +26,27 @@ const razorpay = new Razorpay({
 // CORS configuration - Updated to use environment variables
 const corsOptions = {
   origin: function (origin, callback) {
+    console.log('CORS check - Origin:', origin);
+    console.log('CORS check - CORS_ORIGINS env var:', process.env.CORS_ORIGINS);
+    
     // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+    if (!origin) {
+      console.log('CORS: No origin, allowing');
+      return callback(null, true);
+    }
     
     const allowedOrigins = process.env.CORS_ORIGINS 
       ? process.env.CORS_ORIGINS.split(',').map(url => url.trim())
       : ['http://localhost:5174'];
     
+    console.log('CORS: Allowed origins:', allowedOrigins);
+    console.log('CORS: Checking if', origin, 'is in allowed list');
+    
     if (allowedOrigins.includes(origin)) {
+      console.log('CORS: Origin allowed');
       callback(null, true);
     } else {
+      console.log('CORS: Origin rejected');
       callback(new Error('Not allowed by CORS'));
     }
   },
