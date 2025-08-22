@@ -84,7 +84,7 @@ app.use('/api/admin/rooms', roomRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/payment', paymentRoutes);
 // Routes
-app.use('/', registrationRoutes);
+app.use('/api', registrationRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 404 handler
